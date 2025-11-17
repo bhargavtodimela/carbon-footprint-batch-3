@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CO₂ Impact Monitor</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
+<body>
+
+    <header class="appbar">
+        <h2>
+            <i class="fas fa-leaf"></i> CO₂ Impact Monitor
+        </h2>
+        <button id="darkModeToggle" class="dark-toggle" title="Toggle Dark Mode">
+            <i class="fas fa-moon"></i>
+        </button>
+    </header>
+
+    <div class="container">
+
+        <!-- QUESTION CARD -->
+        <div class="card animate-slide" id="formCard">
+            <h1 class="title">
+                <i class="fas fa-clipboard-list"></i> Carbon Footprint Survey
+            </h1>
+
+            <!-- Progress Meter -->
+            <div class="progress-container">
+                <div class="progress-label">Survey Progress</div>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <span id="progressText" class="progress-text">0%</span>
+            </div>
+
+            <div class="grid">
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-car"></i> 1. KM travelled daily
+                    </label>
+                    <input id="q1" type="number" class="input" placeholder="E.g. 10" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-bolt"></i> 2. Electricity usage (kWh/day)
+                    </label>
+                    <input id="q2" type="number" class="input" placeholder="E.g. 5" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-tint"></i> 3. Water usage (litres/day)
+                    </label>
+                    <input id="q3" type="number" class="input" placeholder="E.g. 100" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-fire"></i> 4. LPG cylinders per month
+                    </label>
+                    <input id="q4" type="number" class="input" placeholder="E.g. 1" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-snowflake"></i> 5. Fan/AC usage (hours/day)
+                    </label>
+                    <input id="q5" type="number" class="input" placeholder="E.g. 4" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-utensils"></i> 6. Cooked meals per day
+                    </label>
+                    <input id="q6" type="number" class="input" placeholder="E.g. 3" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-recycle"></i> 7. Plastic items thrown weekly
+                    </label>
+                    <input id="q7" type="number" class="input" placeholder="E.g. 5" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-laptop"></i> 8. Device usage (hours/week)
+                    </label>
+                    <input id="q8" type="number" class="input" placeholder="E.g. 20" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-shopping-bag"></i> 9. Packaged food (units/week)
+                    </label>
+                    <input id="q9" type="number" class="input" placeholder="E.g. 4" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-bus"></i> 10. Public transport distance (km/week)
+                    </label>
+                    <input id="q10" type="number" class="input" placeholder="E.g. 15" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-plane"></i> 11. Short flights per year
+                    </label>
+                    <input id="q11" type="number" class="input" placeholder="E.g. 1" min="0" step="1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-drumstick-bite"></i> 12. Meat-rich meals (per week)
+                    </label>
+                    <input id="q12" type="number" class="input" placeholder="E.g. 4" min="0" step="0.1" />
+                </div>
+
+                <div class="qbox">
+                    <label>
+                        <i class="fas fa-recycle"></i> 13. Recycling (kg/week)
+                    </label>
+                    <input id="q13" type="number" class="input" placeholder="E.g. 2" min="0" step="0.1" />
+                </div>
+            </div>
+
+            <div id="autoSaveStatus" class="auto-save-status"></div>
+
+            <button class="btn" onclick="calculate()">
+                <i class="fas fa-calculator"></i> Calculate CO₂ Footprint
+            </button>
+        </div>
+
+        <!-- RESULT CARD -->
+        <div class="card animate-slide hide" id="resultCard">
+            <h1 class="title">
+                <i class="fas fa-chart-line"></i> Your Carbon Footprint
+            </h1>
+
+            <div id="scoreBox" class="scoreBox"></div>
+
+            <!-- Animated Progress Meter -->
+            <div class="progress-meter-container">
+                <canvas id="progressMeter"></canvas>
+                <div class="progress-meter-text">
+                    <div id="progressPercentage">0%</div>
+                    <div class="progress-label-small">of max recommended</div>
+                </div>
+            </div>
+
+            <!-- Charts Container -->
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3><i class="fas fa-chart-pie"></i> Emissions Breakdown</h3>
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3><i class="fas fa-chart-bar"></i> Category Comparison</h3>
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <div id="recommendBox" class="recommendBox"></div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="exportPDF()">
+                    <i class="fas fa-file-pdf"></i> Export PDF Report
+                </button>
+                <button class="btn" onclick="restart()">
+                    <i class="fas fa-redo"></i> Retake Survey
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
